@@ -1,0 +1,26 @@
+version: "3.8"
+
+services:
+  app:
+    build: ./
+    container_name: 'pashasTask-app'
+    ports:
+      - "8081:8081"
+    depends_on:
+      - postgres
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/videotheca
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=postgres
+
+  postgres:
+    image: 'postgres:15.2'
+    container_name: 'videotheca'
+    environment:
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_DB: videotheca
+    ports:
+      - "5432:5432"
+    expose:
+      - '5432'
