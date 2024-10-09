@@ -9,17 +9,19 @@
             <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse" id="navbarNav">
-            <ul class="navbar-nav mr-auto">
-                <li class="nav-item">
-                    <a class="nav-link" href="${pageContext.request.contextPath}/films">Фильмы</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="${pageContext.request.contextPath}/actors">Актёры</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="${pageContext.request.contextPath}/directors">Режиссёры</a>
-                </li>
-            </ul>
+            <c:if test="${not (pageContext.request.requestURI.contains('/login') || pageContext.request.requestURI.contains('/registration'))}">
+                <ul class="navbar-nav mr-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="${pageContext.request.contextPath}/films">Фильмы</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="${pageContext.request.contextPath}/actors">Актёры</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="${pageContext.request.contextPath}/directors">Режиссёры</a>
+                    </li>
+                </ul>
+            </c:if>
             <div class="form-inline">
                 <c:if test="${not empty sessionScope.user}">
                     <div class="form-group mr-2">
