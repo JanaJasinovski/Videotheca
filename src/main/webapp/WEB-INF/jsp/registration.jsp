@@ -39,8 +39,8 @@
             <div class="card-body">
                 <form action="${pageContext.request.contextPath}/registration" method="post">
                     <div class="form-group">
-                        <label for="fullname"><fmt:message key="page.login.fullName" />:</label>
-                        <input type="text" class="form-control" name="fullname" id="fullname" value="${param.fullname}" required>
+                        <label for="fullName"><fmt:message key="page.login.fullName" />:</label>
+                        <input type="text" class="form-control" name="fullName" id="fullName" value="${param.fullName}" required>
                     </div>
                     <div class="form-group">
                         <label for="email"><fmt:message key="page.login.email" />:</label>
