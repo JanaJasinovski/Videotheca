@@ -8,8 +8,8 @@
 <body>
 <%@ include file="includs/header.jsp"%>
 
-<h2>Добавить актёра:</h2>
-<form action="${pageContext.request.contextPath}/add-actor" method="post">
+<h2>Добавить директора:</h2>
+<form action="${pageContext.request.contextPath}/add-director" method="post">
     <input type="text" name="fullName" placeholder="Полное имя" required />
     <input type="date" name="birthDate" required />
     <button type="submit">Добавить</button>
@@ -18,12 +18,12 @@
 <h1>Список актёров:</h1>
 
 <div class="row">
-    <c:forEach var="actor" items="${requestScope.actors}">
+    <c:forEach var="director" items="${requestScope.directors}">
         <div class="col-md-4">
             <div class="card film-card">
                 <div class="card-body">
-                    <h2 class="card-title">${actor.fullName}</h2>
-                    <h5 class="card-subtitle mb-2 text-muted">${actor.birthDate}</h5>
+                    <h2 class="card-title">${director.fullName}</h2>
+                    <h5 class="card-subtitle mb-2 text-muted">${director.birthDate}</h5>
                 </div>
             </div>
         </div>

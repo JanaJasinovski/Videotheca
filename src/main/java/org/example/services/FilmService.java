@@ -60,6 +60,10 @@ public class FilmService {
                 .collect(toList());
     }
 
+    public void addFilm(FilmDto film) {
+        filmsDao.addFilm(film);
+    }
+
     public static FilmService getInstance() {
         return INSTANCE;
     }

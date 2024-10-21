@@ -14,4 +14,5 @@ public class UrlPath {
     public static final String REVIEWS = "/reviews";
     public static final String USER_REVIEWS = "/user-reviews";
     public static final String FILM_ACTORS = "/filmActors";
+    public static final String DIRECTORS = "/directors";
 }

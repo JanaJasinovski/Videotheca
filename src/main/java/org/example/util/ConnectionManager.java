@@ -1,5 +1,8 @@
 package org.example.util;
 
+import com.zaxxer.hikari.HikariConfig;
+import com.zaxxer.hikari.HikariDataSource;
+
 import java.lang.reflect.Proxy;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -11,75 +14,29 @@ import java.util.concurrent.BlockingQueue;
 
 public class ConnectionManager {
 
-    private static final String URL_KEY = "db.url";
-    private static final String USERNAME_KEY = "db.username";
-    private static final String PASSWORD_KEY = "db.password";
-    private static final String DRIVER = "db.driver";
-    private static final String POOL_SIZE_KEY = "db.pool.size";
-    private static final Integer DEFAULT_POOL_SIZE = 10;
-    private static BlockingQueue<Connection> pool;
-    private static List<Connection> sourceConnections;
+    private static HikariDataSource dataSource;
 
     static {
-        loadDriver();
-        initConnectionPool();
+        HikariConfig config = new HikariConfig();
+        config.setJdbcUrl(PropertiesUtil.get("db.url"));
+        config.setUsername(PropertiesUtil.get("db.username"));
+        config.setPassword(PropertiesUtil.get("db.password"));
+        config.setDriverClassName(PropertiesUtil.get("db.driver"));
+        config.setMaximumPoolSize(Integer.parseInt(PropertiesUtil.get("db.pool.size", "10")));
+
+        dataSource = new HikariDataSource(config);
     }
 
     private ConnectionManager() {
     }
 
-    private static void initConnectionPool() {
-        var poolSize = PropertiesUtil.get(POOL_SIZE_KEY);
-        var size = poolSize == null ? DEFAULT_POOL_SIZE : Integer.parseInt(poolSize);
-        pool = new ArrayBlockingQueue<>(size);
-        sourceConnections = new ArrayList<>(size);
-        for (int i = 0; i < size; i++) {
-            var connection = open();
-            var proxyConnection = (Connection)
-                    Proxy.newProxyInstance(ConnectionManager.class.getClassLoader(), new Class[]{Connection.class},
-                            (proxy, method, args) -> method.getName().equals("close")
-                                    ? pool.add((Connection) proxy)
-                                    : method.invoke(connection, args));
-            pool.add(proxyConnection);
-            sourceConnections.add(connection);
-        }
+    public static Connection get() throws SQLException {
+        return dataSource.getConnection();
     }
 
-    public static Connection get() {
-        try {
-            return pool.take();
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    private static Connection open() {
-        try {
-            return DriverManager.getConnection(
-                    PropertiesUtil.get(URL_KEY),
-                    PropertiesUtil.get(USERNAME_KEY),
-                    PropertiesUtil.get(PASSWORD_KEY)
-            );
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    private static void loadDriver() {
-        try {
-            Class.forName("org.postgresql.Driver");
-        } catch (ClassNotFoundException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    public static void closePool() {
-        try {
-            for (Connection sourceConnection : sourceConnections) {
-                sourceConnection.close();
-            }
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
+    public static void close() {
+        if (dataSource != null) {
+            dataSource.close();
         }
     }
 }

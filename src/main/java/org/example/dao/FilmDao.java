@@ -2,6 +2,7 @@ package org.example.dao;
 
 import lombok.NoArgsConstructor;
 import lombok.SneakyThrows;
+import org.example.dto.FilmDto;
 import org.example.entities.Film;
 import org.example.util.ConnectionManager;
 
@@ -35,6 +36,12 @@ public class FilmDao implements Dao<Long, Film> {
             JOIN actor a ON fa.actor_id = a.id
             WHERE a.fullName = ?
             """;
+
+    private static final String INSERT_FILM = """
+        INSERT INTO film (name, directorId, releaseDate, country, genre)
+        VALUES (?, ?, ?, ?, ?)
+        RETURNING id
+        """;
 
     @Override
     @SneakyThrows
@@ -106,4 +113,29 @@ public class FilmDao implements Dao<Long, Film> {
         return INSTANCE;
     }
 
+    public void addFilm(FilmDto filmDto) {
+        try (var connection = ConnectionManager.get();
+             var preparedStatement = connection.prepareStatement(INSERT_FILM, java.sql.Statement.RETURN_GENERATED_KEYS)) {
+
+            preparedStatement.setString(1, filmDto.getName());
+            preparedStatement.setInt(2, filmDto.getDirectorId());
+            preparedStatement.setTimestamp(3, Timestamp.valueOf(filmDto.getReleaseDate()));
+            preparedStatement.setString(4, filmDto.getCountry());
+            preparedStatement.setString(5, filmDto.getGenre());
+
+            int affectedRows = preparedStatement.executeUpdate();
+            if (affectedRows > 0) {
+                try (var generatedKeys = preparedStatement.getGeneratedKeys()) {
+                    if (generatedKeys.next()) {
+                        int generatedId = generatedKeys.getInt(1);
+                        System.out.println("Generated Film ID: " + generatedId);
+                    }
+                }
+            } else {
+                System.out.println("No rows affected.");
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
 }

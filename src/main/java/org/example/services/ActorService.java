@@ -16,11 +16,20 @@ public class ActorService {
         return actorDao.findActorsByFilmId(filmId);
     }
 
+    public List<Actor> findAll() {
+        return actorDao.findAll();
+    }
+
+    public Actor addActor(Actor actor) {
+        return actorDao.save(actor);
+    }
+
+    public Actor findByFullName(String fullName) {
+        return actorDao.findByFullName(fullName);
+    }
+
     public static ActorService getInstance() {
         return INSTANCE;
     }
 
-    public List<Actor> findAll() {
-        return actorDao.findAll();
-    }
 }

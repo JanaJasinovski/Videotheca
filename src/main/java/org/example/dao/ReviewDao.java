@@ -5,6 +5,7 @@ import lombok.SneakyThrows;
 import org.example.entities.Review;
 import org.example.util.ConnectionManager;
 
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -26,6 +27,10 @@ public class ReviewDao implements Dao<Integer, Review> {
             FROM review
             WHERE userId = ?
             """;
+    private static final String SAVE ="""
+             INSERT INTO review (filmId, userId, text, rating) VALUES (?, ?, ?, ?)
+             RETURNING id
+         """;
 
     @Override
     public List<Review> findAll() {
@@ -34,7 +39,26 @@ public class ReviewDao implements Dao<Integer, Review> {
 
     @Override
     public Review save(Review entity) {
-        return null;
+        try (var connection = ConnectionManager.get();
+             var preparedStatement = connection.prepareStatement(SAVE, java.sql.Statement.RETURN_GENERATED_KEYS)) {
+
+            preparedStatement.setInt(1, entity.getFilmId());
+            preparedStatement.setInt(2, entity.getUserId());
+            preparedStatement.setString(3, entity.getText());
+            preparedStatement.setInt(4, entity.getRating());
+
+            int affectedRows = preparedStatement.executeUpdate();
+            if (affectedRows > 0) {
+                try (var generatedKeys = preparedStatement.getGeneratedKeys()) {
+                    if (generatedKeys.next()) {
+                        entity.setId(generatedKeys.getInt(1));
+                    }
+                }
+            }
+            return entity;
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override

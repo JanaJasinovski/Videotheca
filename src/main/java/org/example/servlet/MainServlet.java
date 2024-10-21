@@ -7,12 +7,14 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.example.Command;
 import org.example.command.ActorsCommand;
+import org.example.command.AddActorCommand;
+import org.example.command.AddDirectorCommand;
+import org.example.command.DirectorCommand;
 import org.example.command.DownloadCommand;
 import org.example.command.FilmActorsCommand;
 import org.example.command.FilmsCommand;
 import org.example.command.LocaleCommand;
 import org.example.command.LogoutCommand;
-import org.example.command.RegistrationCommand;
 import org.example.command.ReviewsCommand;
 import org.example.command.UserReviewsCommand;
 import org.example.util.UrlPath;
@@ -30,6 +32,9 @@ public class MainServlet extends HttpServlet {
         super.init();
         commandMap.put(UrlPath.FILMS, new FilmsCommand());
         commandMap.put(UrlPath.ACTORS, new ActorsCommand());
+        commandMap.put(UrlPath.DIRECTORS, new DirectorCommand());
+        commandMap.put("/add-actor", new AddActorCommand());
+        commandMap.put("/add-director", new AddDirectorCommand());
         commandMap.put(UrlPath.LOGOUT, new LogoutCommand());
         commandMap.put(UrlPath.REVIEWS, new ReviewsCommand());
         commandMap.put(UrlPath.FILM_ACTORS, new FilmActorsCommand());
@@ -40,6 +45,22 @@ public class MainServlet extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        String commandName = req.getServletPath();
+        Command command = commandMap.get(commandName);
+
+        if (command != null) {
+            try {
+                command.execute(req, resp);
+            } catch (Exception e) {
+                throw new ServletException(e);
+            }
+        } else {
+            resp.sendError(HttpServletResponse.SC_NOT_FOUND);
+        }
+    }
+
+    @Override
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         String commandName = req.getServletPath();
         Command command = commandMap.get(commandName);
 

@@ -20,7 +20,7 @@ public class ActorDao implements Dao<Long, Actor> {
     private static final ActorDao INSTANCE = new ActorDao();
 
     private static final String SAVE_SQL =
-            "INSERT INTO actors (fullName, birthDate) VALUES (?, ?)";
+            "INSERT INTO actor (fullname, birthdate) VALUES (?, ?)";
 
     private static final String FIND_ACTORS_BY_FILM_ID = """
             SELECT a.id, a.fullName, a.birthdate
@@ -33,6 +33,8 @@ public class ActorDao implements Dao<Long, Actor> {
             SELECT fullName, birthdate
             FROM actor 
             """;
+
+    private static final String FIND_BY_FULLNAME = "SELECT * FROM actor WHERE fullname = ?";
 
     @Override
     public List<Actor> findAll() {
@@ -93,6 +95,24 @@ public class ActorDao implements Dao<Long, Actor> {
             }
         }
         return actors;
+    }
+
+    public Actor findByFullName(String fullName) {
+        try (var connection = ConnectionManager.get();
+             var preparedStatement = connection.prepareStatement(FIND_BY_FULLNAME)) {
+            preparedStatement.setString(1, fullName);
+            var resultSet = preparedStatement.executeQuery();
+            if (resultSet.next()) {
+                return new Actor(
+                        resultSet.getObject("id", Integer.class),
+                        resultSet.getObject("fullName", String.class),
+                        resultSet.getObject("birthdate", LocalDate.class)
+                );
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return null;
     }
 
     public static ActorDao getInstance() {
