@@ -44,6 +44,7 @@
         <input type="submit" value="Просмотреть отзывы" class="btn btn-primary">
     </form>
 </div>
+<a href="${pageContext.request.contextPath}/addFilm" class="btn btn-success">Добавить фильм</a>
 
 <div class="row">
     <c:forEach var="film" items="${requestScope.films}">

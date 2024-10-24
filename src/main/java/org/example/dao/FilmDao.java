@@ -2,13 +2,13 @@ package org.example.dao;
 
 import lombok.NoArgsConstructor;
 import lombok.SneakyThrows;
+import org.example.dto.FilmDto;
 import org.example.entities.Film;
-import org.example.util.ConnectionManager;
+import org.example.util.HibernateUtil;
+import org.hibernate.Session;
+import org.hibernate.Transaction;
+import org.hibernate.query.Query;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Timestamp;
-import java.util.ArrayList;
 import java.util.List;
 
 import static lombok.AccessLevel.PRIVATE;
@@ -17,88 +17,46 @@ import static lombok.AccessLevel.PRIVATE;
 public class FilmDao implements Dao<Long, Film> {
     private static final FilmDao INSTANCE = new FilmDao();
 
-    private static final String FIND_ALL = """
-            SELECT *
-            FROM film
-            """;
-
-    private static final String FIND_BY_YEAR = """
-            SELECT *
-            FROM film
-            WHERE EXTRACT(YEAR FROM releaseDate) = ?
-            """;
-
-    private static final String FIND_BY_ACTOR_NAME = """
-            SELECT f.*
-            FROM film f
-            JOIN film_actor fa ON f.id = fa.film_id
-            JOIN actor a ON fa.actor_id = a.id
-            WHERE a.fullName = ?
-            """;
-
     @Override
     @SneakyThrows
     public List<Film> findAll() {
-        try (var connection = ConnectionManager.get();
-             var preparedStatement = connection.prepareStatement(FIND_ALL)) {
-            var resultSet = preparedStatement.executeQuery();
-            List<Film> films = new ArrayList<>();
-            while (resultSet.next()) {
-                films.add(buildFilm(resultSet));
-            }
-
-            return films;
+        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+            Query<Film> query = session.createQuery("FROM Film", Film.class);
+            return query.getResultList();
         }
-    }
-
-    @Override
-    public Film save(Film entity) {
-        return null;
     }
 
     @Override
     @SneakyThrows
-    public List<Film> getFilmsByYear(int year) {
-        try (var connection = ConnectionManager.get();
-             var preparedStatement = connection.prepareStatement(FIND_BY_YEAR)) {
-            preparedStatement.setInt(1, year);
-            var resultSet = preparedStatement.executeQuery();
-            List<Film> films = new ArrayList<>();
-            while (resultSet.next()) {
-                films.add(buildFilm(resultSet));
-            }
-            return films;
+    public Film save(Film entity) {
+        Transaction transaction = null;
+        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+            transaction = session.beginTransaction();
+            session.save(entity);
+            transaction.commit();
+            return entity;
+        } catch (Exception e) {
+            if (transaction != null) transaction.rollback();
+            throw e;
         }
     }
 
-    @Override
-    public List<Film> findActorsByFilmId(Long filmId) {
-        return null;
-    }
-
-
-    private Film buildFilm(ResultSet resultSet) throws SQLException {
-        return new Film(
-                resultSet.getObject("id", Integer.class),
-                resultSet.getObject("name", String.class),
-                resultSet.getObject("directorId", Integer.class),
-                resultSet.getObject("releaseDate", Timestamp.class).toLocalDateTime(),
-                resultSet.getObject("country", String.class),
-                resultSet.getObject("genre", String.class)
-        );
+    @SneakyThrows
+    public List<Film> getFilmsByYear(int year) {
+        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+            Query<Film> query = session.createQuery("FROM Film WHERE YEAR(releaseDate) = :year", Film.class);
+            query.setParameter("year", year);
+            return query.getResultList();
+        }
     }
 
     @SneakyThrows
     public List<Film> findFilmsByActorName(String actorName) {
-        try (var connection = ConnectionManager.get();
-             var preparedStatement = connection.prepareStatement(FIND_BY_ACTOR_NAME)) {
-            preparedStatement.setString(1, actorName);
-            var resultSet = preparedStatement.executeQuery();
-            List<Film> films = new ArrayList<>();
-            while (resultSet.next()) {
-                films.add(buildFilm(resultSet));
-            }
-            return films;
+        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+            Query<Film> query = session.createQuery(
+                    "SELECT f FROM Film f JOIN f.actors a WHERE a.fullName = :actorName", Film.class);
+            query.setParameter("actorName", actorName);
+            return query.getResultList();
         }
     }
 
@@ -106,4 +64,22 @@ public class FilmDao implements Dao<Long, Film> {
         return INSTANCE;
     }
 
+    public void addFilm(FilmDto filmDto) {
+        Film film = new Film();
+        film.setName(filmDto.getName());
+        film.setDirector(filmDto.getDirector());
+        film.setReleaseDate(filmDto.getReleaseDate());
+        film.setCountry(filmDto.getCountry());
+        film.setGenre(filmDto.getGenre());
+
+        save(film);
+    }
+
+    public Film getById(Integer id) {
+        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+            Query<Film> query = session.createQuery("FROM Film WHERE id= :id", Film.class);
+            query.setParameter("id", id);
+            return query.getSingleResult();
+        }
+    }
 }

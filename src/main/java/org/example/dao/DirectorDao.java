@@ -2,38 +2,50 @@ package org.example.dao;
 
 import lombok.NoArgsConstructor;
 import org.example.entities.Director;
-import org.example.util.ConnectionManager;
+import org.example.util.HibernateUtil;
+import org.hibernate.Session;
+import org.hibernate.Transaction;
+import org.hibernate.query.Query;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
-import static java.sql.Statement.RETURN_GENERATED_KEYS;
 import static lombok.AccessLevel.PRIVATE;
+
 @NoArgsConstructor(access = PRIVATE)
 public class DirectorDao implements Dao<Integer, Director> {
-    private static final String SAVE_SQL =
-            "INSERT INTO director (fullname, birthdate) VALUES (?, ?, ?)";
+    private static final DirectorDao INSTANCE = new DirectorDao();
 
     @Override
     public List<Director> findAll() {
-      return null;
+        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+            Query<Director> query = session.createQuery("FROM Director", Director.class);
+            return query.getResultList();
+        }
     }
 
     @Override
-    public Director save(Director entity) {
-        return null;
+    public Director save(Director director) {
+        Transaction transaction = null;
+        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+            transaction = session.beginTransaction();
+            session.save(director);
+            transaction.commit();
+            return director;
+        } catch (Exception e) {
+            if (transaction != null) transaction.rollback();
+            throw e;
+        }
     }
 
-    @Override
-    public List<Director> getFilmsByYear(int year) {
-        return null;
+    public Director findByFullName(String fullName) {
+        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+            Query<Director> query = session.createQuery("FROM Director WHERE fullName = :fullName", Director.class);
+            query.setParameter("fullName", fullName);
+            return query.uniqueResult();
+        }
     }
 
-    @Override
-    public List<Director> findActorsByFilmId(Long filmId) {
-        return null;
+    public static DirectorDao getInstance() {
+        return INSTANCE;
     }
 }

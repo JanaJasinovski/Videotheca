@@ -5,8 +5,10 @@ import org.example.dao.ActorDao;
 import org.example.dao.FilmDao;
 import org.example.dto.FilmDto;
 import org.example.entities.Actor;
+import org.example.entities.Film;
 
 import java.util.List;
+import java.util.Optional;
 
 import static java.util.stream.Collectors.toList;
 
@@ -21,8 +23,8 @@ public class FilmService {
                 .map(film -> FilmDto.builder()
                         .id(film.getId())
                         .name(film.getName())
-                        .actorsId(film.getActorsId())
-                        .directorId(film.getDirectorId())
+                        .actors(film.getActors())
+                        .director(film.getDirector())
                         .releaseDate(film.getReleaseDate())
                         .country(film.getCountry())
                         .genre(film.getGenre())
@@ -36,8 +38,8 @@ public class FilmService {
                 .map(film -> FilmDto.builder()
                         .id(film.getId())
                         .name(film.getName())
-                        .actorsId(film.getActorsId())
-                        .directorId(film.getDirectorId())
+                        .actors(film.getActors())
+                        .director(film.getDirector())
                         .releaseDate(film.getReleaseDate())
                         .country(film.getCountry())
                         .genre(film.getGenre())
@@ -51,7 +53,7 @@ public class FilmService {
                 .map(film -> FilmDto.builder()
                         .id(film.getId())
                         .name(film.getName())
-                        .directorId(film.getDirectorId())
+                        .director(film.getDirector())
                         .releaseDate(film.getReleaseDate())
                         .country(film.getCountry())
                         .genre(film.getGenre())
@@ -60,7 +62,16 @@ public class FilmService {
                 .collect(toList());
     }
 
+    public void addFilm(FilmDto film) {
+        filmsDao.addFilm(film);
+    }
+
+    public Film getById(Integer id) {
+        return filmsDao.getById(id);
+    }
+
     public static FilmService getInstance() {
         return INSTANCE;
     }
+
 }

@@ -20,6 +20,11 @@
                     <li class="nav-item">
                         <a class="nav-link" href="${pageContext.request.contextPath}/directors">Режиссёры</a>
                     </li>
+                    <li>
+                        <form method="GET" action="${pageContext.request.contextPath}/download" class="d-inline">
+                            <input type="submit" value="Скачать отчет" class="btn btn-info">
+                        </form>
+                    </li>
                 </ul>
             </c:if>
             <div class="form-inline">

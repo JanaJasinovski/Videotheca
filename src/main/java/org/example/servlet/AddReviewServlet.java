@@ -6,20 +6,18 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.example.Command;
-import org.example.command.LoginCommand;
+import org.example.command.AddReviewCommand;
 import org.example.util.JspHelper;
-import org.example.util.UrlPath;
 
 import java.io.IOException;
 
-@WebServlet(UrlPath.LOGIN)
-public class LoginServlet extends HttpServlet {
-
-    private final Command loginCommand = new LoginCommand();
+@WebServlet("/addReview")
+public class AddReviewServlet extends HttpServlet {
+    private final Command loginCommand = new AddReviewCommand();
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        req.getRequestDispatcher(JspHelper.getPath("login")).forward(req, resp);
+        req.getRequestDispatcher(JspHelper.getPath("addReview")).forward(req, resp);
     }
 
     @Override

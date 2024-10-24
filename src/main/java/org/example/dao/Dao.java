@@ -7,7 +7,4 @@ public interface Dao<K, T> {
 
     T save(T entity);
 
-    List<T> getFilmsByYear(int year);
-
-    List<T> findActorsByFilmId(Long filmId);
 }

@@ -23,4 +23,8 @@ public class ReviewService {
     public List<Review> findReviewsByUserId(Integer userId) {
         return reviewDao.findReviewsByUserId(userId);
     }
+
+    public void addReview(Review review) {
+        ReviewDao.getInstance().save(review);
+    }
 }

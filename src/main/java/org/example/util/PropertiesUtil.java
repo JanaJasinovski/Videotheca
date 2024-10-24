@@ -24,4 +24,8 @@ public final class PropertiesUtil {
     public static String get(String key) {
         return PROPERTIES.getProperty(key);
     }
+
+    public static String get(String key, String defaultValue) {
+        return PROPERTIES.getProperty(key, defaultValue);
+    }
 }
