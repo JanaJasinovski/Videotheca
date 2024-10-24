@@ -24,7 +24,7 @@ public class ActorService {
         return actorDao.save(actor);
     }
 
-    public Actor findByFullName(String fullName) {
+    public List<Actor> findByFullName(String fullName) {
         return actorDao.findByFullName(fullName);
     }
 

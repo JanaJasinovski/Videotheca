@@ -5,8 +5,8 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.example.Command;
 import org.example.dto.FilmDto;
-import org.example.entities.Director;
 import org.example.entities.Actor;
+import org.example.entities.Director;
 import org.example.services.ActorService;
 import org.example.services.DirectorService;
 import org.example.services.FilmService;
@@ -15,6 +15,7 @@ import org.example.util.JspHelper;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -40,25 +41,28 @@ public class AddFilmCommand implements Command {
             return;
         }
 
-        Set<Integer> actorIds = Arrays.stream(actorsNames)
+        Set<List<Actor>> actors = Arrays.stream(actorsNames)
                 .map(String::trim)
                 .map(actorService::findByFullName)
                 .filter(actor -> actor != null)
-                .map(Actor::getId)
                 .collect(Collectors.toSet());
 
-        if (actorIds.isEmpty()) {
+        if (actors.isEmpty()) {
             req.setAttribute("error", "Актёры не найдены");
             req.getRequestDispatcher(JspHelper.getPath("addFilm")).forward(req, resp);
             return;
         }
 
+        Set<Actor> uniqueActors = actors.stream()
+                .flatMap(List::stream)
+                .collect(Collectors.toSet());
+
         LocalDate releaseDateParsed = LocalDate.parse(releaseDate);
 
         FilmDto filmDto = FilmDto.builder()
                 .name(name)
-                .directorId(director.getId())
-                .actorsId(actorIds)
+                .director(director)
+                .actors(uniqueActors)
                 .releaseDate(releaseDateParsed.atStartOfDay())  // LocalDate в LocalDateTime
                 .country(country)
                 .genre(genre)

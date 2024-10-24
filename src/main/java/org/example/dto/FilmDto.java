@@ -2,6 +2,8 @@ package org.example.dto;
 
 import lombok.Builder;
 import lombok.Value;
+import org.example.entities.Actor;
+import org.example.entities.Director;
 
 import java.time.LocalDateTime;
 import java.util.Set;
@@ -11,8 +13,8 @@ import java.util.Set;
 public class FilmDto {
     Integer id;
     String name;
-    Set<Integer> actorsId;
-    Integer directorId;
+    Set<Actor> actors;
+    Director director;
     LocalDateTime releaseDate;
     String country;
     String genre;

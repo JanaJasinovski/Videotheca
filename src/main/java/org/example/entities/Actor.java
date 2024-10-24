@@ -24,9 +24,4 @@ public class Actor {
 
     private String fullName;
     private LocalDate birthDate;
-
-    public Actor(String fullName, LocalDate birthDate) {
-        this.fullName = fullName;
-        this.birthDate = birthDate;
-    }
 }
