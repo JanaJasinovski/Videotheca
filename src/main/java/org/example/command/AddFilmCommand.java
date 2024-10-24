@@ -33,7 +33,6 @@ public class AddFilmCommand implements Command {
         String country = req.getParameter("country");
         String genre = req.getParameter("genre");
 
-        // Находим режиссёра по имени
         Director director = directorService.findByFullName(directorFullName);
         if (director == null) {
             req.setAttribute("error", "Режиссёр не найден");
